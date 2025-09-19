@@ -1,0 +1,22 @@
+{
+  "name": "sprout",
+  "version": "1.0.0",
+  "description": "JavaScript alternative",
+  "main": "dist/index.js",
+  "bin": {
+    "sprout": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sprout counter</title>
+  </head>
+  <body>
+    <div id="count">0</div>
+    <button id="add">Add one</button>
+
+    <script type="text/sprout">
+    let n = 0
+    listen "#add" click {
+      n = n + 1
+      set "#count" text to n
+    }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+let n = 0
+listen "#add" click {
+  n = n + 1
+  set "#count" text to n
+}
