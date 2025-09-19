@@ -31,6 +31,19 @@ if (inputPath.endsWith('.html')) {
   console.log(`Sprout: wrote ${path.relative(process.cwd(), outputPath)}`);
 }
 
+/**
+ * Replaces all `<script type="text/sprout">...</script>` blocks in an HTML string with compiled JavaScript script blocks,
+ * injecting a single runtime script tag once before the first compiled block.
+ *
+ * The function performs a case-insensitive global search for `<script>` tags whose `type` is `text/sprout`. For each match
+ * it compiles the script body using `compileSprout(...).code` and replaces the original block with:
+ *   - a single `<script>` containing the provided `runtime` (inserted only before the first compiled block), and
+ *   - a `<script>` containing the compiled code.
+ *
+ * @param html - The input HTML text to transform.
+ * @param runtime - The runtime bundle source to inject (inserted as a `<script>` before the first compiled block).
+ * @returns The transformed HTML with all Sprout script blocks replaced by executable JavaScript.
+ */
 function transformHtml(html: string, runtime: string): string {
   let injected = false;
   return html.replace(
@@ -44,6 +57,18 @@ function transformHtml(html: string, runtime: string): string {
   );
 }
 
+/**
+ * Compute the absolute output path for a given input file and optional requested output.
+ *
+ * If `requested` is provided it is resolved against the current working directory and returned.
+ * Otherwise:
+ * - For inputs ending with `.html` returns the same directory with a `<basename>.compiled.html` filename.
+ * - For other inputs returns the same directory with a `<basename>.js` filename (basename excludes the input extension).
+ *
+ * @param input - Path to the input file (can be relative or absolute); used to derive the default output filename when `requested` is not provided.
+ * @param requested - Optional output path; when present it is resolved to an absolute path relative to the current working directory.
+ * @returns An absolute or filesystem path for the output file.
+ */
 function resolveOutputPath(input: string, requested?: string): string {
   if (requested) {
     return path.resolve(process.cwd(), requested);
@@ -58,6 +83,14 @@ function resolveOutputPath(input: string, requested?: string): string {
   return path.join(dir, `${name}.js`);
 }
 
+/**
+ * Loads the compiled runtime bundle and returns its contents as a string.
+ *
+ * Reads the `runtime.js` file located next to the CLI script and returns its UTF-8 contents.
+ *
+ * @returns The runtime bundle file contents.
+ * @throws Error if the runtime bundle cannot be found (suggests running `npm run build`).
+ */
 function loadRuntime(): string {
   const runtimePath = path.resolve(__dirname, 'runtime.js');
   if (!fs.existsSync(runtimePath)) {
@@ -66,6 +99,13 @@ function loadRuntime(): string {
   return fs.readFileSync(runtimePath, 'utf8');
 }
 
+/**
+ * Print CLI usage instructions to stdout.
+ *
+ * Displays the expected command format and brief descriptions of the required
+ * input (a `.sprout` script or an `.html` file with `<script type="text/sprout">`
+ * blocks) and the optional output path.
+ */
 function printUsage(): void {
   console.log('Usage: sprout <input> [output]');
   console.log('  input: .sprout script or .html file containing <script type="text/sprout"> tags');
