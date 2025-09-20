@@ -26,6 +26,25 @@ import {
   UnaryExpression,
 } from './ast';
 
+// Escape potentially dangerous chars when embedding in JavaScript code
+const charMap: Record<string, string> = {
+  '<': '\\u003C',
+  '>': '\\u003E',
+  '/': '\\u002F',
+  '\\': '\\\\',
+  '\b': '\\b',
+  '\f': '\\f',
+  '\n': '\\n',
+  '\r': '\\r',
+  '\t': '\\t',
+  '\0': '\\0',
+  '\u2028': '\\u2028',
+  '\u2029': '\\u2029'
+};
+function escapeUnsafeChars(str: string): string {
+  return str.replace(/[<>\b\f\n\r\t\0\u2028\u2029/\\]/g, x => charMap[x] || x);
+}
+
 type BinaryExpression = import('./ast').BinaryExpression;
 type ExpressionNode = import('./ast').Expression;
 
@@ -147,7 +166,7 @@ export class CodeGenerator {
   private generateBind(statement: BindStatement): void {
     const source = this.generateExpression(statement.source);
     const selector = this.generateExpression(statement.selector);
-    const property = JSON.stringify(statement.property);
+    const property = escapeUnsafeChars(JSON.stringify(statement.property));
     this.emitLine(`sprout.bind(() => ${source}, ${selector}, ${property});`);
   }
 
